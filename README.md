@@ -1,42 +1,49 @@
-# sv
+# Arfa Blur
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+AI-powered webcam privacy app that automatically blurs your camera when no face is detected. Runs entirely in the browser — no data leaves your device.
 
-## Creating a project
+## Features
 
-If you're seeing this, you've probably already done this step. Congrats!
+- **Real-time face detection** using MediaPipe Face Landmarker
+- **Auto blur** when no face is detected, unblur when face returns
+- **Multi-face detection** — detects up to 10 faces with labeled bounding boxes
+- **Fade transitions** for smooth blur/unblur effect
+- **Detection delay** to prevent flickering on brief detection loss
+- **100% on-device** — no server, no data upload
 
-```sh
-# create a new project
-npx sv create my-app
+## Tech Stack
+
+- [SvelteKit](https://kit.svelte.dev/)
+- [MediaPipe Face Landmarker](https://ai.google.dev/edge/mediapipe/solutions/vision/face_landmarker)
+- TypeScript
+- Vite
+
+## Getting Started
+
+```bash
+# install dependencies
+pnpm install
+
+# start dev server
+pnpm dev
 ```
 
-To recreate this project with the same configuration:
+Open [http://localhost:5173](http://localhost:5173) in your browser and allow camera access when prompted.
 
-```sh
-# recreate this project
-pnpm dlx sv@0.16.3 create --template minimal --types ts --install pnpm .
+## Build
+
+```bash
+pnpm build
 ```
 
-## Developing
+## How It Works
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+1. Camera stream is displayed in a `<video>` element
+2. MediaPipe Face Landmarker detects faces on each frame
+3. If face is detected → blur OFF, bounding boxes drawn on canvas
+4. If no face detected (for 400ms+) → blur ON with fade transition
+5. All processing happens in-browser using WebGL/GPU acceleration
 
-```sh
-npm run dev
+## License
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
-
-## Building
-
-To create a production version of your app:
-
-```sh
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+MIT
