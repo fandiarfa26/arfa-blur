@@ -11,6 +11,7 @@
 	let stream: MediaStream | null = null;
 	let detector: FaceDetector | null = null;
 	let animFrameId: number | null = null;
+	let error: string | null = null;
 
 	function drawBoxes(boxes: BoundingBox[]) {
 		const ctx = canvasEl?.getContext('2d');
@@ -71,6 +72,11 @@
 			loop();
 		} catch (err) {
 			console.error('Camera error:', err);
+			if (err instanceof DOMException && err.name === 'NotAllowedError') {
+				error = 'Camera access denied. Please allow camera permission.';
+			} else {
+				error = 'Failed to access camera.';
+			}
 		}
 	}
 
@@ -88,15 +94,17 @@
 	onDestroy(stop);
 </script>
 
-<svelte:window on:resize={resizeCanvas} />
+<svelte:window onresize={resizeCanvas} />
 
-<div class="webcam-container">
-	<video bind:this={videoEl} playsinline muted onloadedmetadata={resizeCanvas}></video>
-	<canvas bind:this={canvasEl} class="face-canvas"></canvas>
-	{#if $privacyMode}
-		<div class="blur-overlay" transition:fade={{ duration: 100 }}></div>
-	{/if}
-</div>
+	<div class="webcam-container">
+		<video bind:this={videoEl} playsinline muted onloadedmetadata={resizeCanvas}></video>
+		<canvas bind:this={canvasEl} class="face-canvas"></canvas>
+		{#if error}
+			<div class="error-overlay">{error}</div>
+		{:else if $privacyMode}
+			<div class="blur-overlay" transition:fade={{ duration: 100 }}></div>
+		{/if}
+	</div>
 
 <style>
 	.webcam-container {
@@ -130,5 +138,18 @@
 		inset: 0;
 		backdrop-filter: blur(24px);
 		-webkit-backdrop-filter: blur(24px);
+	}
+
+	.error-overlay {
+		position: absolute;
+		inset: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: #1a1a1a;
+		color: #e74c3c;
+		font-size: 14px;
+		text-align: center;
+		padding: 24px;
 	}
 </style>

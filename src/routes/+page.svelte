@@ -22,11 +22,4 @@
 		align-items: center;
 		gap: 16px;
 	}
-
-	h1 {
-		font-size: 28px;
-		font-weight: 700;
-		color: #eee;
-		margin: 0;
-	}
 </style>
