@@ -12,20 +12,34 @@
 	let detector: FaceDetector | null = null;
 	let animFrameId: number | null = null;
 
-	function drawBox(box: BoundingBox | null) {
+	function drawBoxes(boxes: BoundingBox[]) {
 		const ctx = canvasEl?.getContext('2d');
 		if (!ctx || !canvasEl) return;
 		ctx.clearRect(0, 0, canvasEl.width, canvasEl.height);
-		if (!box) return;
 
-		const x = box.x * canvasEl.width;
-		const y = box.y * canvasEl.height;
-		const w = box.width * canvasEl.width;
-		const h = box.height * canvasEl.height;
-
+		ctx.font = '16px monospace';
+		ctx.fillStyle = '#00ff88';
 		ctx.strokeStyle = '#00ff88';
 		ctx.lineWidth = 3;
-		ctx.strokeRect(x, y, w, h);
+
+		boxes.forEach((box, i) => {
+			const x = box.x * canvasEl.width;
+			const y = box.y * canvasEl.height;
+			const w = box.width * canvasEl.width;
+			const h = box.height * canvasEl.height;
+
+			ctx.strokeRect(x, y, w, h);
+
+			const label = `Face ${i + 1}`;
+			const textWidth = ctx.measureText(label).width;
+			const labelX = x + (w - textWidth) / 2;
+			const labelY = y - 6;
+
+			ctx.fillStyle = '#000';
+			ctx.fillRect(labelX - 2, labelY - 14, textWidth + 4, 18);
+			ctx.fillStyle = '#00ff88';
+			ctx.fillText(label, labelX, labelY);
+		});
 	}
 
 	function resizeCanvas() {
@@ -48,10 +62,10 @@
 
 			function loop() {
 				if (!detector || !videoEl) return;
-				const { hasFace, boundingBox } = detector.detect(videoEl);
+				const { hasFace, boundingBoxes } = detector.detect(videoEl);
 				faceDetected.set(hasFace);
 				privacyMode.set(!hasFace);
-				drawBox(boundingBox);
+				drawBoxes(boundingBoxes);
 				animFrameId = requestAnimationFrame(loop);
 			}
 			loop();

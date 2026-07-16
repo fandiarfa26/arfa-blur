@@ -11,7 +11,7 @@ export interface BoundingBox {
 
 export interface DetectionResult {
 	hasFace: boolean;
-	boundingBox: BoundingBox | null;
+	boundingBoxes: BoundingBox[];
 }
 
 export interface FaceDetector {
@@ -33,7 +33,7 @@ export async function createFaceDetector(): Promise<FaceDetector> {
 				delegate: 'GPU'
 			},
 			runningMode: 'VIDEO',
-			numFaces: 1
+			numFaces: 10
 		});
 	}
 
@@ -66,7 +66,7 @@ export async function createFaceDetector(): Promise<FaceDetector> {
 
 	return {
 		detect(video: HTMLVideoElement): DetectionResult {
-			if (video.readyState < 2) return { hasFace: currentlyHasFace, boundingBox: null };
+			if (video.readyState < 2) return { hasFace: currentlyHasFace, boundingBoxes: [] };
 
 			const result = faceLandmarker!.detectForVideo(video, performance.now());
 			const faceDetected = result.faceLandmarks.length > 0;
@@ -83,12 +83,11 @@ export async function createFaceDetector(): Promise<FaceDetector> {
 				}
 			}
 
-			const boundingBox =
-				currentlyHasFace && result.faceLandmarks.length > 0
-					? computeBoundingBox(result.faceLandmarks[0])
-					: null;
+			const boundingBoxes = currentlyHasFace
+				? result.faceLandmarks.map(computeBoundingBox)
+				: [];
 
-			return { hasFace: currentlyHasFace, boundingBox };
+			return { hasFace: currentlyHasFace, boundingBoxes };
 		},
 		destroy(): void {
 			if (faceLandmarker) {
